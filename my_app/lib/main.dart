@@ -1,14 +1,19 @@
  import 'package:flutter/material.dart';
-
+ import 'services/api_services.dart';
 // ------------------------------------------------------------
 // PROGRAM START
 // ------------------------------------------------------------
 
 void main() {
-  // Flutter app ko start karta hai.
+   // Flutter app ko start karta hai.
   // MyApp hamara root widget hai.
   runApp(const MyApp());
 }
+ //Get function 
+
+
+
+
 
 // ------------------------------------------------------------
 // PARENT WIDGET
@@ -43,6 +48,7 @@ class _MyAppState extends State<MyApp> {
   //
   // Ye state MyApp ke paas rakhi gayi hai.
   // Isliye MyApp parent hai aur HomeScreen child hai.
+
   bool isDarkMode = false;
 
   @override
@@ -168,7 +174,8 @@ class HomeScreen extends StatefulWidget {
 // ------------------------------------------------------------
 
 class _HomeScreenState extends State<HomeScreen> {
-
+//bcz api ki class bnauyi to usko use krne k liye uska obj bhi bnana pdega
+final ApiServices apiServices = ApiServices();
   // ----------------------------------------------------------
   // LOCAL STATE
   // ----------------------------------------------------------
@@ -298,6 +305,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 fontWeight: FontWeight.bold,
               ),
             ),
+
+//click pr onpress functin chlega getUsers call ho jayega
+            ElevatedButton(onPressed: ()async{
+         final users = await apiServices.getUsers();
+
+print(users[0].name);
+print(users[0].email);
+
+            },
+             child: const Text('Get Users'),
+             ),
           ],
         ),
       ),
