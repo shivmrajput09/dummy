@@ -1,29 +1,11 @@
- import 'package:flutter/material.dart';
- import 'services/api_services.dart';
-// ------------------------------------------------------------
-// PROGRAM START
-// ------------------------------------------------------------
+import 'package:flutter/material.dart';
+import 'services/api_services.dart';
+import 'models/user_model.dart'; // UserModel ko import karna zaroori hai
 
 void main() {
-   // Flutter app ko start karta hai.
-  // MyApp hamara root widget hai.
   runApp(const MyApp());
 }
- //Get function 
 
-
-
-
-
-// ------------------------------------------------------------
-// PARENT WIDGET
-// ------------------------------------------------------------
-
-// StatefulWidget use kiya hai kyunki MyApp ke andar
-// aisa data hai jo change ho sakta hai.
-//
-// Yahan isDarkMode change hoga,
-// isliye MyApp ko StatefulWidget banaya.
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
@@ -31,93 +13,19 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-// ------------------------------------------------------------
-// MyApp KI STATE
-// ------------------------------------------------------------
-
 class _MyAppState extends State<MyApp> {
-
-  // ----------------------------------------------------------
-  // GLOBAL / PARENT STATE
-  // ----------------------------------------------------------
-
-  // Ye theme ki state hai.
-  //
-  // false = Light Mode
-  // true  = Dark Mode
-  //
-  // Ye state MyApp ke paas rakhi gayi hai.
-  // Isliye MyApp parent hai aur HomeScreen child hai.
-
   bool isDarkMode = false;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-
-      // ------------------------------------------------------
-      // APP THEME
-      // ------------------------------------------------------
-      //
-      // Agar isDarkMode true hai:
-      //     Dark Theme
-      //
-      // Agar isDarkMode false hai:
-      //     Light Theme
-      //
-      // Jab isDarkMode change hoga aur setState() chalega,
-      // MyApp dobara build hoga aur theme bhi change hogi.
-
       theme: isDarkMode ? ThemeData.dark() : ThemeData.light(),
-
-      // ------------------------------------------------------
-      // HOME SCREEN KO DATA PASS KARNA
-      // ------------------------------------------------------
-
       home: HomeScreen(
-
-        // Parent ki state child ko pass kar rahe hain.
-        //
-        // MyApp:
-        //     isDarkMode
-        //
-        // HomeScreen:
-        //     widget.isDarkMode
-        //
         isDarkMode: isDarkMode,
-
-        // ----------------------------------------------------
-        // CALLBACK FUNCTION
-        // ----------------------------------------------------
-        //
-        // Child ke paas directly parent ki state change karne
-        // ka access nahi hai.
-        //
-        // Isliye parent child ko ek function de raha hai.
-        //
-        // HomeScreen jab theme change karna chahega,
-        // ye function call karega.
-        //
-        // value = Switch ki new value
-        //
         onThemeChanged: (value) {
-
-          // Parent ki state update kar rahe hain.
           setState(() {
-
-            // New value ko isDarkMode mein store kar diya.
             isDarkMode = value;
-
-            // ------------------------------------------------
-            // YE STATE LIFTING HAI
-            // ------------------------------------------------
-            //
-            // State ko child mein rakhne ke bajaye
-            // parent mein rakha gaya.
-            //
-            // Child sirf event/function ke through parent ko
-            // batata hai ki state change karni hai.
           });
         },
       ),
@@ -125,42 +33,12 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-// ============================================================
-// CHILD WIDGET
-// ============================================================
-
-// HomeScreen bhi StatefulWidget hai.
-//
-// Kyunki iske paas apni LOCAL STATE hai:
-//     counter
-//
-// Saath hi ye parent se theme ki state receive karta hai.
 class HomeScreen extends StatefulWidget {
-
-  // ----------------------------------------------------------
-  // PARENT SE AANE WALI VALUE
-  // ----------------------------------------------------------
-
-  // Parent se isDarkMode receive hoga.
   final bool isDarkMode;
-
-  // ----------------------------------------------------------
-  // PARENT SE AANE WALA FUNCTION
-  // ----------------------------------------------------------
-
-  // ValueChanged<bool> ka matlab:
-  //
-  // Ye ek function hai jo bool value receive karega.
-  //
-  // Example:
-  // onThemeChanged(true);
-  //
   final ValueChanged<bool> onThemeChanged;
 
   const HomeScreen({
     super.key,
-
-    // Ye dono values parent se aani compulsory hain.
     required this.isDarkMode,
     required this.onThemeChanged,
   });
@@ -169,197 +47,133 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-// ------------------------------------------------------------
-// HomeScreen KI STATE
-// ------------------------------------------------------------
-
 class _HomeScreenState extends State<HomeScreen> {
-//bcz api ki class bnauyi to usko use krne k liye uska obj bhi bnana pdega
-final ApiServices apiServices = ApiServices();
-  // ----------------------------------------------------------
-  // LOCAL STATE
-  // ----------------------------------------------------------
+  // ApiServices ka object (jo tumne banaya hai)
+  final ApiServices apiServices = ApiServices();
 
-  // Ye counter sirf HomeScreen ke liye hai.
-  //
-  // Initially:
-  // counter = 0
-  //
-  // Jab + button dabega:
-  // counter = counter + 1
-  //
-  // Is state ko parent ki zarurat nahi hai,
-  // isliye ye local state hai.
-  int counter = 0;
+  // ----------------------------------------------------
+  // NAYI STATES (ApiServices ke data ko handle karne ke liye)
+  // ----------------------------------------------------
+  List<UserModel> usersList = [];
+  bool isLoading = false;
+  String errorMessage = '';
+  int counter = 0; // Tumhara purana counter
+
+  // ----------------------------------------------------
+  // API FETCH FUNCTION
+  // ----------------------------------------------------
+  void fetchUsersData() async {
+    setState(() {
+      isLoading = true;   // Jab data aana shuru ho, loader on kar do
+      errorMessage = '';  // Purana error clear kar do
+    });
+
+    try {
+      // Tumhare ApiServices wala getUsers() call ho raha hai
+      final result = await apiServices.getUsers();
+      
+      setState(() {
+        usersList = result;   // Data mil gaya, list mein save kar liya
+        isLoading = false;    // Loading khatam
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = e.toString(); // Jo exception ApiServices se aayi, use save kar liya
+        isLoading = false;           // Error aane par bhi loading band
+      });
+    }
+  }
+  // 1. Ek naya function jo list ko khaali kar dega
+void clearUsersData() {
+  setState(() {
+    usersList = [];       // List ko wapas empty kar diya
+    errorMessage = '';    // Agar koi error thi toh use bhi saaf kar diya
+  });
+}
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-
-      // ======================================================
-      // APP BAR
-      // ======================================================
-
       appBar: AppBar(
-
-        title: const Text(
-          'Quick State Management Demo',
-        ),
-
-        // AppBar ke right side mein widgets.
+        title: const Text('API Learning Sequence'),
         actions: [
-
-          // --------------------------------------------------
-          // THEME SWITCH
-          // --------------------------------------------------
-
           Switch(
-
-            // Parent se received value use kar rahe hain.
-            //
-            // widget.isDarkMode
-            //
-            // Yahan "widget" ka matlab HomeScreen object hai.
-            //
             value: widget.isDarkMode,
-
-            // ------------------------------------------------
-            // CHILD -> PARENT COMMUNICATION
-            // ------------------------------------------------
-            //
-            // User Switch change karega.
-            //
-            // Flutter new bool value dega:
-            //
-            // true / false
-            //
-            // Ye value parent ke callback function ko
-            // bhej di jayegi.
-            //
-            // Parent mein:
-            //
-            // isDarkMode = value
-            //
-            // aur setState() chalega.
             onChanged: widget.onThemeChanged,
           ),
         ],
       ),
+      body: Column(
+        children: [
+          const SizedBox(height: 10),
+          Text(
+            'Counter: $counter',
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 10),
 
-      // ======================================================
-      // BODY
-      // ======================================================
+          // Button jo ab print() ki jagah fetchUsersData() chalayega
+          ElevatedButton(
+            onPressed: fetchUsersData,
+            child: const Text('Get Users'),
+          ),
+          const SizedBox(height: 10),
+          // Clear Users Button
+    ElevatedButton(
+      style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+      onPressed: clearUsersData, // Yeh function list saaf kar dega
+      child: const Text('Clear List', style: TextStyle(color: Colors.white)),
+    ),
 
-      body: Center(
-
-        // NOTE:
-        // Tumhare original code mein yahan:
-        //
-        // pressed: Column(...)
-        //
-        // diya hua hai.
-        //
-        // Center mein valid property "child" hoti hai.
-        // Isliye compile karne ke liye ise:
-        //
-        // child: Column(...)
-        //
-        // karna hoga.
-
-        child: Column(
-
-
-          // Column ke children ko vertically center karega.
-          mainAxisAlignment: MainAxisAlignment.center,
-
-          children: [
-
-            // ------------------------------------------------
-            // INFORMATION TEXT
-            // ------------------------------------------------
-
-            const Text(
-              'Button dabane par counter badhega:',
-            ),
-
-            // ------------------------------------------------
-            // COUNTER VALUE
-            // ------------------------------------------------
-
-            Text(
-
-              // counter ki current value screen par show hogi.
-              //
-              // Example:
-              // counter = 0
-              // screen par "0"
-              //
-              // counter = 1
-              // screen par "1"
-              //
-              '$counter',
-
-              style: const TextStyle(
-                fontSize: 48,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-
-//click pr onpress functin chlega getUsers call ho jayega
-            ElevatedButton(onPressed: ()async{
-         final users = await apiServices.getUsers();
-
-print(users[0].name);
-print(users[0].email);
-
-            },
-             child: const Text('Get Users'),
-             ),
-          ],
-        ),
+          // ----------------------------------------------------
+          // UI DISPLAY (Loading, Error, ya ListView.builder)
+          // ----------------------------------------------------
+          Expanded(
+            child: isLoading
+                ? const Center(
+                    child: CircularProgressIndicator(), // 1. Jab data load ho raha ho
+                  )
+                : errorMessage.isNotEmpty
+                    ? Center(
+                        child: Text(
+                          errorMessage,
+                          style: const TextStyle(color: Colors.red, fontSize: 16),
+                          textAlign: TextAlign.center,
+                        ), // 2. Jab koi error aaye
+                      )
+                    : usersList.isEmpty
+                        ? const Center(
+                            child: Text('Click the button to load users.'),
+                          ) // 3. Jab list empty ho
+                        : ListView.builder(
+                            // 4. Jab data successfully aa jaye
+                            itemCount: usersList.length,
+                            itemBuilder: (context, index) {
+                              final user = usersList[index];
+                              return Card(
+                                margin: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 5),
+                                child: ListTile(
+                                  leading: CircleAvatar(
+                                    child: Text(user.id.toString()),
+                                  ),
+                                  title: Text(user.name), // user ka naam
+                                  subtitle: Text(user.email), // user ki email
+                                ),
+                              );
+                            },
+                          ),
+          ),
+        ],
       ),
-
-      // ======================================================
-      // FLOATING ACTION BUTTON
-      // ======================================================
-
       floatingActionButton: FloatingActionButton(
-
-        // Jab button press hoga.
         onPressed: () {
-
-          // --------------------------------------------------
-          // LOCAL STATE UPDATE
-          // --------------------------------------------------
-
-          // setState Flutter ko batata hai:
-          //
-          // "Meri state change hui hai,
-          //  widget ko dobara build karo."
           setState(() {
-
-            // Counter ko 1 se increase kar rahe hain.
-            //
-            // counter++;
-            //
-            // same as:
-            // counter = counter + 1;
             counter++;
-
-            // ------------------------------------------------
-            // YE LOCAL STATE MANAGEMENT HAI
-            // ------------------------------------------------
-            //
-            // counter sirf HomeScreen mein use ho raha hai.
-            // Isliye counter ki state HomeScreen ke andar hi hai.
           });
         },
-
-        // Button ke andar + icon.
         child: const Icon(Icons.add),
       ),
     );
   }
 }
- 
