@@ -48,4 +48,25 @@ class ApiServices {
       throw Exception('Something went Wrong : $e');
     }
   }
+
+  //post req
+  Future<void> createUser() async{
+    final body =
+  {
+    'name' : 'shivam',
+    'username' : 'shivmrajput_09',
+    'email' : 'shivmt880@gmail.com',
+  };
+
+  final response = await http.post(
+    Uri.parse('https://jsonplaceholder.typicode.com/users'),
+    headers: {
+      'Content-type' : 'application/json',
+      'Accept' : 'application/json',
+    },
+    body: jsonEncode(body),
+  );
+  print(response.statusCode);
+  print(response.body);
+  }
 }

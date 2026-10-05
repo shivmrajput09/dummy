@@ -124,6 +124,12 @@ void clearUsersData() {
       onPressed: clearUsersData, // Yeh function list saaf kar dega
       child: const Text('Clear List', style: TextStyle(color: Colors.white)),
     ),
+SizedBox(height: 5),
+    //create user
+    ElevatedButton(onPressed:  (){
+      apiServices.createUser();
+    }, child:  
+  const Text('Create User'),),
 
           // ----------------------------------------------------
           // UI DISPLAY (Loading, Error, ya ListView.builder)
