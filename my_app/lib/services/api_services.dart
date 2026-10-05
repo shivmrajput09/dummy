@@ -69,4 +69,67 @@ class ApiServices {
   print(response.statusCode);
   print(response.body);
   }
+//patch
+
+  Future<void> patchUser(int id) async{
+    final body = {
+     'username' : 'shivmrajput_09___blah-blah-blah.....',
+   };
+  
+  final response = await http.patch(
+    Uri.parse('https://jsonplaceholder.typicode.com/users/$id'),
+     headers: {
+      'Content-type' : 'application/json',
+      'Accept' : 'application/json',
+    },
+    body : jsonEncode(body),
+
+  );
+  print(response.statusCode);
+  print(response.body);
+  }
+
+//put
+ Future<void> putUser(int id) async{
+    final body = {
+    'name' : 'Hi ! this is update user ',
+    'username' : 'shivmrajput_09',
+    'email' : ' ukonwThis@gmail.com',
+  };
+  
+  final response = await http.put(
+    Uri.parse('https://jsonplaceholder.typicode.com/users/$id'),
+     headers: {
+      'Content-type' : 'application/json',
+      'Accept' : 'application/json',
+    },
+    body : jsonEncode(body),
+
+  );
+  print(response.statusCode);
+  print(response.body);
+  }
+
+  //delte use
+   Future<void> deleteUser(int id) async{
+  //   final body = {
+  //   'name' : 'Hi ! this is update user ',
+  //   'username' : 'shivmrajput_09',
+  //   'email' : ' ukonwThis@gmail.com',
+  // };
+  
+  final response = await http.delete(
+    Uri.parse('https://jsonplaceholder.typicode.com/users/$id'),
+     headers: {
+      //  'Content-type' : 'application/json',
+      'Accept' : 'application/json',
+    },
+    // body : jsonEncode(body),
+
+  );
+  print(response.statusCode);
+  print(response.body);
+  }
+
+
 }

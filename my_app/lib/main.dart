@@ -130,6 +130,24 @@ SizedBox(height: 5),
       apiServices.createUser();
     }, child:  
   const Text('Create User'),),
+SizedBox(height: 5),
+    //create user
+    ElevatedButton(onPressed:  (){
+      apiServices.patchUser(11);
+    }, child:  
+  const Text(' patch User'),),
+SizedBox(height: 5),
+    //create user
+    ElevatedButton(onPressed:  (){
+      apiServices.putUser(1);
+    }, child:  
+  const Text(' Put User'),),
+SizedBox(height: 5),
+    //delete user
+    ElevatedButton(onPressed:  (){
+      apiServices.deleteUser(1);
+    }, child:  
+  const Text(' Delete User'),),
 
           // ----------------------------------------------------
           // UI DISPLAY (Loading, Error, ya ListView.builder)
